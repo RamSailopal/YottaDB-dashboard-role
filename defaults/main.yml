@@ -1,0 +1,8 @@
+---
+# defaults file for YottaDB-dashboard
+instdir: /usr/local/YottaDB-dashboard
+yotroutdir: /root/.yottadb/r1.30_x86_64/r
+mgateway: no
+yotta_env:
+  YOTTA_PROM_PORT: '8001'
+  yotta_dir: '/root/.yottadb/r1.30_x86_64'

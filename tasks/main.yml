@@ -1,0 +1,80 @@
+---
+# tasks file for YottaDB-dashboard
+- name: Make sure that git is installed
+  zypper:
+   name: "{{ item }}"
+   state: "present"
+  loop:
+    - git
+  when: ansible_distribution is search("SUSE")
+- name: Make sure that git is installed
+  yum:
+   name: "{{ item }}"
+   state: "present"
+  loop:
+    - git
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+- name: Make sure that git is installed
+  apt:
+   name: "{{ item }}"
+   state: "present"
+  loop:
+    - git
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+- name: clone the YottaDB-dashboard repo
+  git:
+    repo: https://github.com/RamSailopal/YottaDB-dashboard.git
+    dest: "{{ instdir }}"
+  tags:
+    - skip_ansible_lint # Need to get latest version so ignoring need for version parameter
+- name: "Make sure that ydbdash.sh and ydbdash.py have executable permissions"
+  file:
+     path: "{{ item }}"
+     mode: "0744"
+  loop:
+     - "{{ instdir}}/ydbdash.sh"
+     - "{{ instdir}}/ydbdash.py"
+- name: "Check the version of Python that is running"
+  find:
+    paths: /usr/bin
+    use_regex: "yes"
+    file_type: "link"
+    patterns: '^.*python3.*$'
+  register: python3
+- name: "Check the version of Python that is running"
+  find:
+    paths: /usr/bin
+    use_regex: "yes"
+    file_type: "link"
+    patterns: '^.*python2.*$'
+  register: python2
+- name: Set the executable links
+  file:
+    src: '/usr/bin/python2'
+    dest: '/usr/bin/python'
+    state: link
+  when: python2.matched >= 1
+- name: Set the executable links
+  file:
+    src: '/usr/bin/python3'
+    dest: '/usr/bin/python'
+    state: link
+  when: python3.matched >= 1
+- name: "Install the Python prometheus module"
+  pip:
+    name: "prometheus_client"
+- name: Install the necessary routines
+  command:
+    chdir: "{{ instdir }}"
+    cmd:  './install.sh "{{ yotroutdir }}"'
+- name: Install the necessary routines for M-Gateway log analytics
+  command:
+    chdir: "{{ instdir }}"
+    cmd:  './install-mgsi.sh'
+  when: mgateway == "yes"
+- name: Run the process to pull dashboard metrics
+  shell: ./ydbdash.sh "start"
+  args:  
+    chdir: "{{ instdir }}" 
+  environment: 
+    YOTTA_PROM_PORT: '8001'
