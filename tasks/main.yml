@@ -82,4 +82,3 @@
   when: 1
   tags:
     - skip_ansible_lint # Need to run shell to run process
-
