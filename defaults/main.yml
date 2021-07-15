@@ -5,4 +5,5 @@ yotroutdir: /root/.yottadb/r1.30_x86_64/r
 mgateway: no
 yotta_env:
   YOTTA_PROM_PORT: '8001'
-  yotta_dir: '/root/.yottadb/r1.30_x86_64'
+  yotta_dir: '/root/.yottadb'
+  ydb_rel: 'r1.30_x86_64'
