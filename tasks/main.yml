@@ -67,6 +67,7 @@
   command:
     chdir: "{{ instdir }}"
     cmd:  './install.sh "{{ yotroutdir }}"'
+  when: 1
 - name: Install the necessary routines for M-Gateway log analytics
   command:
     chdir: "{{ instdir }}"
@@ -74,7 +75,11 @@
   when: mgateway == "yes"
 - name: Run the process to pull dashboard metrics
   shell: ./ydbdash.sh "start"
-  args:  
-    chdir: "{{ instdir }}" 
-  environment: 
-    YOTTA_PROM_PORT: '8001'
+  args:
+    chdir: "{{ instdir }}"
+  environment:
+    - "{{ yotta_env }}"
+  when: 1
+  tags:
+    - skip_ansible_lint # Need to run shell to run process
+
